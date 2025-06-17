@@ -1,0 +1,51 @@
+import { supabase } from "@/helper/supabaseClient";
+import type { Session } from "@supabase/supabase-js";
+import { createContext, useContext, useEffect, useState } from "react";
+
+interface AuthContextType {
+  session: Session | null;
+  isLoading: boolean;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export function AuthContextProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const [session, setSession] = useState<Session | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const checkSession = async () => {
+      const {
+        data: { session },
+        error,
+      } = await supabase.auth.getSession();
+      if (error) {
+        console.error("Error fetching session:", error);
+        setIsLoading(false);
+        return;
+      }
+      setSession(session);
+      setIsLoading(false);
+    };
+
+    checkSession();
+  }, []);
+
+  return (
+    <AuthContext.Provider value={{ session, isLoading }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export const userAuth = () => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error("userAuth must be used within an AuthContextProvider");
+  }
+  return context;
+};
