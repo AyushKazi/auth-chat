@@ -3,36 +3,27 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/SignUp";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import Wrapper from "./pages/Wrapper";
-import { AuthContextProvider } from "./context/AuthContext";
+import Wrapper from "./ProtectedRoute";
+import AuthRedirect from "./AuthRedirect";
 
 function App() {
   return (
     <>
-      <AuthContextProvider>
-        <BrowserRouter>
-          <Routes>
-            {/* home */}
-            <Route path="/" element={<Home />} />
-
-            {/* register */}
+      <BrowserRouter>
+        <Routes>
+          {/* Public */}
+          <Route path="/" element={<Home />} />
+          <Route element={<AuthRedirect />}>
             <Route path="/signUp" element={<Signup />} />
-
-            {/* login */}
             <Route path="/login" element={<Login />} />
+          </Route>
 
-            {/* Dashboard */}
-            <Route
-              path="/dashboard"
-              element={
-                <Wrapper>
-                  <Dashboard />
-                </Wrapper>
-              }
-            />
-          </Routes>
-        </BrowserRouter>
-      </AuthContextProvider>
+          {/* Protected */}
+          <Route element={<Wrapper />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
     </>
   );
 }

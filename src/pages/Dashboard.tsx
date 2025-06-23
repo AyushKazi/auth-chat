@@ -1,12 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { supabase } from "../helper/supabaseClient";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { userAuth } from "@/context/AuthContext";
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const { session } = userAuth();
-  const email = session?.user?.email;
+  const email = session?.user.email;
 
   // Function to handle sign out
   const handleSignOut = async () => {
@@ -14,6 +14,7 @@ export default function Dashboard() {
     if (error) {
       throw error;
     }
+
     navigate("/login");
     return null;
   };
@@ -26,9 +27,23 @@ export default function Dashboard() {
         logged in{" "}
       </h2>
 
-      <Button className="mt-20" variant={"secondary"} onClick={handleSignOut}>
+      <Button
+        className="mt-20 mr-10"
+        variant={"secondary"}
+        onClick={handleSignOut}
+      >
         Sign Out
       </Button>
+      <Link to="/login">
+        <Button className="mt-20" variant={"secondary"}>
+          Login
+        </Button>
+      </Link>
+      <Link to="/">
+        <Button className="mt-20 ml-10" variant={"secondary"}>
+          Home
+        </Button>
+      </Link>
     </div>
   );
 }
