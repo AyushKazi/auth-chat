@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { use, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,7 +13,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Link, useNavigate } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
+// import { userAuth } from "@/context/AuthContext";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Invalid email" }),
@@ -26,6 +27,9 @@ type LoginFormSchema = z.infer<typeof formSchema>;
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from || "/dashboard";
+
   const form = useForm<LoginFormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -54,61 +58,103 @@ export default function Login() {
     }
 
     if (data) {
-      navigate("/dashboard");
+      navigate(from, { replace: true });
       return null;
     }
   };
 
-  return (
-    <div className="max-w-md mx-auto p-6 rounded-lg shadow-md border mt-20">
-      <h2 className="my-8 text-3xl font-semibold text-center">Login</h2>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          {/* email */}
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input type="email" placeholder="Email" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    setMessage("");
 
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Password</FormLabel>
-                <FormControl>
-                  <Input type="password" placeholder="Password" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <p className="text-sm">
-            Don't have an account?{" "}
-            <Link className="underline text-blue-300" to={"/signup"}>
-              Sign Up
-            </Link>
-          </p>
-          <Button
-            variant={"secondary"}
-            type="submit"
-            className="w-full hover:cursor-pointer"
-            disabled={loading}
-          >
-            {loading ? "Logining In..." : "Login"}
-          </Button>
-        </form>
-      </Form>
-      {message && <p>{message}</p>}
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+    });
+
+    if (error) {
+      setMessage(error.message);
+      setLoading(false);
+      return;
+    }
+
+    // if (data) {
+    //   console.log("Google sign-in data:", data);
+    //   navigate("/dashboard");
+    //   return null;
+    // }
+  };
+
+  return (
+    <div className="container mx-auto ">
+      <div className="  my-20 flex justify-center">
+        <button
+          className="border  px-4 py-2 rounded text-white-600 hover:bg-white-600 hover:text-white transition-colors duration-300"
+          onClick={() => navigate("/")}
+        >
+          Back to home
+        </button>
+        <Link to="/dashboard" className="ml-4 ">
+          <Button variant={"secondary"}> Dashboard</Button>
+        </Link>
+      </div>
+      <div className=" text-center ">
+        <button
+          className="border px-4 py-2 rounded text-white-600 hover:bg-white"
+          onClick={handleGoogleSignIn}
+        >
+          Continue with Google
+        </button>{" "}
+      </div>
+      <hr className="my-8 max-w-sm mx-auto" />
+      <div className=" max-w-sm mx-auto   rounded-lg shadow-md   ">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            {/* email */}
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input type="email" placeholder="Email" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <Input type="password" placeholder="Password" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <p className="text-sm text-center">
+              Don't have an account?{" "}
+              <Link className="underline text-blue-300" to={"/signup"}>
+                Sign Up
+              </Link>
+            </p>
+            <Button
+              variant={"secondary"}
+              type="submit"
+              className="w-full hover:cursor-pointer"
+              disabled={loading}
+            >
+              {loading ? "Logining In..." : "Login"}
+            </Button>
+          </form>
+        </Form>
+        {message && <p>{message}</p>}
+      </div>
     </div>
   );
 }
