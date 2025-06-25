@@ -2,6 +2,8 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "../helper/supabaseClient";
 import { Link, useNavigate } from "react-router";
 import { userAuth } from "@/context/AuthContext";
+import ChatInput from "@/components/ChatInput";
+import MessageList from "@/components/MessageList";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -44,6 +46,8 @@ export default function Dashboard() {
           Home
         </Button>
       </Link>
+      <MessageList />
+      <ChatInput />
     </div>
   );
 }
