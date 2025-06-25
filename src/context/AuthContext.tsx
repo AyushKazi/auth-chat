@@ -5,6 +5,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 interface AuthContextType {
   session: Session | null;
   isLoading: boolean;
+  user: any;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -16,6 +17,7 @@ export function AuthContextProvider({
 }) {
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
     const checkSession = async () => {
@@ -29,6 +31,7 @@ export function AuthContextProvider({
         return;
       }
       setSession(session);
+      setUser(session?.user);
       setIsLoading(false);
     };
 
@@ -38,13 +41,14 @@ export function AuthContextProvider({
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
+      setUser(session?.user ?? null);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
   return (
-    <AuthContext.Provider value={{ session, isLoading }}>
+    <AuthContext.Provider value={{ session, isLoading, user }}>
       {children}
     </AuthContext.Provider>
   );

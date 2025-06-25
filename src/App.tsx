@@ -13,6 +13,8 @@ function App() {
         <Routes>
           {/* Public */}
           <Route path="/" element={<Home />} />
+
+          {/* Public { block for logged in user} */}
           <Route element={<AuthRedirect />}>
             <Route path="/signUp" element={<Signup />} />
             <Route path="/login" element={<Login />} />
